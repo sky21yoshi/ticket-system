@@ -45,7 +45,8 @@ CREATE TABLE projects (
     identifier VARCHAR(50) NOT NULL UNIQUE,
     description TEXT,
     is_public BOOLEAN NOT NULL DEFAULT TRUE,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- 2.4 プロジェクトメンバーテーブル (project_members)
