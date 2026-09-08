@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>チケット新規作成</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body class="bg-light">
+<div class="container my-4" style="max-width: 700px;">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">チケット新規作成</h4>
+        </div>
+        <div class="card-body">
+            <form th:action="@{/issues}" th:object="${issueRequestDto}" method="post">
+
+                <!-- プロジェクト (必須) -->
+                <div class="mb-3">
+                    <label class="form-label">プロジェクト <span class="text-danger">*</span></label>
+                    <select th:field="*{projectId}" class="form-select" th:classappend="${#fields.hasErrors('projectId')} ? 'is-invalid'">
+                        <option value="">選択してください</option>
+                        <option th:each="p : ${projects}" th:value="${p.id}" th:text="${p.name}"></option>
+                    </select>
+                    <div class="invalid-feedback" th:errors="*{projectId}">エラーメッセージ</div>
+                </div>
+
+                <!-- 件名 (必須) -->
+                <div class="mb-3">
+                    <label class="form-label">件名 <span class="text-danger">*</span></label>
+                    <input type="text" th:field="*{subject}" class="form-control" th:classappend="${#fields.hasErrors('subject')} ? 'is-invalid'">
+                    <div class="invalid-feedback" th:errors="*{subject}">エラーメッセージ</div>
+                </div>
+
+                <!-- トラッカー & ステータス -->
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">トラッカー</label>
+                        <select th:field="*{trackerId}" class="form-select">
+                            <option value="">選択してください</option>
+                            <option th:each="t : ${trackers}" th:value="${t.id}" th:text="${t.name}"></option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">ステータス</label>
+                        <select th:field="*{statusId}" class="form-select">
+                            <option value="">選択してください</option>
+                            <option th:each="s : ${statuses}" th:value="${s.id}" th:text="${s.name}"></option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 担当者 & 優先度 -->
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">担当者</label>
+                        <select th:field="*{assigneeId}" class="form-select">
+                            <option value="">未割り当て</option>
+                            <option th:each="u : ${users}" th:value="${u.id}" th:text="${u.username}"></option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">優先度</label>
+                        <select th:field="*{priority}" class="form-select">
+                            <option value="Low">低 (Low)</option>
+                            <option value="Normal" selected>通常 (Normal)</option>
+                            <option value="High">高 (High)</option>
+                            <option value="Urgent">緊急 (Urgent)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 説明 -->
+                <div class="mb-3">
+                    <label class="form-label">説明</label>
+                    <textarea th:field="*{description}" class="form-control" rows="4"></textarea>
+                </div>
+
+                <!-- 開始日 & 期日 -->
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">開始予定日</label>
+                        <input type="date" th:field="*{startDate}" class="form-control">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">期日</label>
+                        <input type="date" th:field="*{dueDate}" class="form-control">
+                    </div>
+                </div>
+
+                <!-- 予定工数 -->
+                <div class="mb-3">
+                    <label class="form-label">予定工数 (時間)</label>
+                    <input type="number" step="0.25" th:field="*{estimatedHours}" class="form-control" placeholder="例: 8.5">
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <a th:href="@{/issues}" class="btn btn-outline-secondary">キャンセル</a>
+                    <button type="submit" class="btn btn-primary">作成する</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

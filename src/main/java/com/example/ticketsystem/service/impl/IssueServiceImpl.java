@@ -22,12 +22,14 @@ import com.example.ticketsystem.service.IssueService;
 
 /**
  * チケット管理 サービス実装クラス
+ * 
+ * JPA Repository を介したデータベース操作、トランザクション境界制御、
+ * および DTO ↔ Entity 相互変換ロジックを担当します。
  */
 @Service
 @Transactional
 public class IssueServiceImpl implements IssueService {
 
-    // 各データソースにアクセスするための Repository を注入
     private final IssueRepository issueRepository;
     private final ProjectRepository projectRepository;
     private final TrackerRepository trackerRepository;
@@ -50,7 +52,6 @@ public class IssueServiceImpl implements IssueService {
 
     /**
      * 全チケット取得
-     * 読み取り専用トランザクションで最適化します。
      */
     @Override
     @Transactional(readOnly = true)
@@ -71,12 +72,11 @@ public class IssueServiceImpl implements IssueService {
     }
 
     /**
-     * チケットの新規登録
+     * 新規チケット作成
      */
     @Override
     public IssueResponseDto create(IssueRequestDto dto) {
         Issue issue = new Issue();
-        // DTOからEntityへフィールド値をマッピング（関連IDのチェック含む）
         mapDtoToEntity(dto, issue);
         
         Issue savedIssue = issueRepository.save(issue);
@@ -84,12 +84,11 @@ public class IssueServiceImpl implements IssueService {
     }
 
     /**
-     * チケットの更新
+     * チケット更新
      */
     @Override
     public Optional<IssueResponseDto> update(Long id, IssueRequestDto dto) {
         return issueRepository.findById(id).map(existingIssue -> {
-            // 既存のEntityインスタンスの値を書き換え
             mapDtoToEntity(dto, existingIssue);
             Issue updatedIssue = issueRepository.save(existingIssue);
             return convertToDto(updatedIssue);
@@ -97,7 +96,7 @@ public class IssueServiceImpl implements IssueService {
     }
 
     /**
-     * チケットの削除
+     * チケット削除 (REST API用: 成否を boolean で返却)
      */
     @Override
     public boolean deleteById(Long id) {
@@ -108,16 +107,25 @@ public class IssueServiceImpl implements IssueService {
         return false;
     }
 
+    /**
+     * チケット削除 (Web用: 存在しない場合は例外をスロー)
+     */
+    @Override
+    public void delete(Long id) {
+        if (!issueRepository.existsById(id)) {
+            throw new IllegalArgumentException("Issue not found with id: " + id);
+        }
+        issueRepository.deleteById(id);
+    }
+
     // ==========================================
     // ヘルパーメソッド (マッピング & バリデーション)
     // ==========================================
 
     /**
-     * リクエスト DTO から Entity へ値を設定します。
-     * ID参照が必要な関連エンティティの有無を検証し、存在しない場合は例外をスローします。
+     * DTO から Entity へのフィールド値設定と、関連IDの存在チェックを行います。
      */
     private void mapDtoToEntity(IssueRequestDto dto, Issue issue) {
-        // 基本フィールドの設定
         issue.setSubject(dto.subject());
         issue.setDescription(dto.description());
         issue.setPriority(dto.priority());
@@ -125,7 +133,7 @@ public class IssueServiceImpl implements IssueService {
         issue.setDueDate(dto.dueDate());
         issue.setEstimatedHours(dto.estimatedHours());
 
-        // 必須: プロジェクトの存在チェックと紐付け
+        // 必須: プロジェクトの存在チェック
         if (dto.projectId() != null) {
             Project project = projectRepository.findById(dto.projectId())
                     .orElseThrow(() -> new IllegalArgumentException("Project not found. ID: " + dto.projectId()));
@@ -165,13 +173,12 @@ public class IssueServiceImpl implements IssueService {
                     .orElseThrow(() -> new IllegalArgumentException("Assignee user not found. ID: " + dto.assigneeId()));
             issue.setAssignee(assignee);
         } else {
-            issue.setAssignee(null); // 担当者なしを許容
+            issue.setAssignee(null);
         }
     }
 
     /**
-     * Entity のデータを レスポンス DTO へ詰め替えます。
-     * Null Safe に関連オブジェクトの表示用名称を取り出します。
+     * Entity から レスポンス DTO へ変換します。
      */
     private IssueResponseDto convertToDto(Issue issue) {
         return new IssueResponseDto(
