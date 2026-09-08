@@ -1,103 +1,58 @@
 package com.example.ticketsystem.service;
 
 import java.util.List;
+import java.util.Optional;
 
-import jakarta.persistence.EntityNotFoundException;
+import com.example.ticketsystem.dto.IssueRequestDto;
+import com.example.ticketsystem.dto.IssueResponseDto;
 
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+/**
+ * チケット管理 サービスインターフェース
+ * 
+ * チケットの作成・参照・更新・削除処理の仕様を定義します。
+ * コントローラー層はこのインターフェースに依存することで、具体的な実装と分離されます。
+ */
+public interface IssueService {
 
-import com.example.ticketsystem.dto.IssueDto;
-import com.example.ticketsystem.entity.Issue;
-import com.example.ticketsystem.entity.IssueStatus;
-import com.example.ticketsystem.entity.Project;
-import com.example.ticketsystem.entity.Tracker;
-import com.example.ticketsystem.entity.User;
-import com.example.ticketsystem.repository.IssueRepository;
-import com.example.ticketsystem.repository.IssueStatusRepository;
-import com.example.ticketsystem.repository.ProjectRepository;
-import com.example.ticketsystem.repository.TrackerRepository;
-import com.example.ticketsystem.repository.UserRepository;
+    /**
+     * 全チケットを取得します。
+     * 
+     * @return チケットレスポンス DTO のリスト
+     */
+    List<IssueResponseDto> findAll();
 
-import lombok.RequiredArgsConstructor;
+    /**
+     * 指定されたIDのチケットを取得します。
+     * 
+     * @param id チケットID
+     * @return 見つかった場合は Optional<IssueResponseDto>、存在しない場合は Optional.empty()
+     */
+    Optional<IssueResponseDto> findById(Long id);
 
-@Service
-@RequiredArgsConstructor
-@Transactional(readOnly = true)
-public class IssueService {
+    /**
+     * 新規チケットを作成します。
+     * 
+     * @param dto リクエスト DTO
+     * @return 作成されたチケットのレスポンス DTO
+     * @throws IllegalArgumentException 指定された関連ID (プロジェクト等) が存在しない場合
+     */
+    IssueResponseDto create(IssueRequestDto dto);
 
-    private final IssueRepository issueRepository;
-    private final ProjectRepository projectRepository;
-    private final TrackerRepository trackerRepository;
-    private final IssueStatusRepository statusRepository;
-    private final UserRepository userRepository;
+    /**
+     * 指定されたIDのチケット情報を更新します。
+     * 
+     * @param id 更新対象のチケットID
+     * @param dto 更新内容を含むリクエスト DTO
+     * @return 更新された場合は Optional<IssueResponseDto>、対象が存在しない場合は Optional.empty()
+     * @throws IllegalArgumentException 指定された関連ID (プロジェクト等) が存在しない場合
+     */
+    Optional<IssueResponseDto> update(Long id, IssueRequestDto dto);
 
-    public List<IssueDto.Response> findAll() {
-        return issueRepository.findAll().stream()
-                .map(this::toResponse)
-                .toList();
-    }
-
-    public IssueDto.Response findById(Long id) {
-        Issue issue = issueRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Issue not found: " + id));
-        return toResponse(issue);
-    }
-
-    @Transactional
-    public IssueDto.Response create(IssueDto.CreateRequest req) {
-        Project project = projectRepository.findById(req.projectId())
-                .orElseThrow(() -> new EntityNotFoundException("Project not found"));
-        Tracker tracker = trackerRepository.findById(req.trackerId())
-                .orElseThrow(() -> new EntityNotFoundException("Tracker not found"));
-        IssueStatus status = statusRepository.findById(req.statusId())
-                .orElseThrow(() -> new EntityNotFoundException("Status not found"));
-        User author = userRepository.findById(req.authorId())
-                .orElseThrow(() -> new EntityNotFoundException("Author not found"));
-        User assignee = req.assigneeId() != null ?
-                userRepository.findById(req.assigneeId()).orElse(null) : null;
-
-        Issue issue = new Issue();
-        issue.setProject(project);
-        issue.setTracker(tracker);
-        issue.setStatus(status);
-        issue.setAuthor(author);
-        issue.setAssignee(assignee);
-        issue.setSubject(req.subject());
-        issue.setDescription(req.description());
-        if (req.priority() != null) issue.setPriority(req.priority());
-        issue.setStartDate(req.startDate());
-        issue.setDueDate(req.dueDate());
-        issue.setEstimatedHours(req.estimatedHours());
-
-        return toResponse(issueRepository.save(issue));
-    }
-
-    @Transactional
-    public void delete(Long id) {
-        if (!issueRepository.existsById(id)) {
-            throw new EntityNotFoundException("Issue not found: " + id);
-        }
-        issueRepository.deleteById(id);
-    }
-
-    private IssueDto.Response toResponse(Issue issue) {
-        return new IssueDto.Response(
-                issue.getId(),
-                issue.getProject().getId(),
-                issue.getProject().getName(),
-                issue.getTracker().getName(),
-                issue.getStatus().getName(),
-                issue.getAuthor().getFullName(),
-                issue.getAssignee() != null ? issue.getAssignee().getFullName() : null,
-                issue.getSubject(),
-                issue.getDescription(),
-                issue.getPriority(),
-                issue.getStartDate(),
-                issue.getDueDate(),
-                issue.getEstimatedHours(),
-                issue.getCreatedAt(),
-                issue.getUpdatedAt()
-        );
-    }
+    /**
+     * 指定されたIDのチケットを削除します。
+     * 
+     * @param id 削除対象のチケットID
+     * @return 削除が実行された場合は true、対象が存在しない場合は false
+     */
+    boolean deleteById(Long id);
 }
