@@ -160,149 +160,109 @@
 erDiagram
     users {
         bigserial id PK
-    email varchar UK "メールアドレス"
-    password_hash varchar "パスワードハッシュ"
-    full_name varchar "氏名"
-    is_admin boolean "管理者フラグ"
-    created_at timestamp "作成日時"
-    updated_at timestamp "更新日時"
-    }
-    roles {
-        bigserial id PK
-        name varchar UK "ロール名"
-        description text "説明"
-    }
-    projects {
-        bigserial id PK
-        name varchar "プロジェクト名"
-        identifier varchar UK "識別子"
-        description text "説明"
-        is_public boolean "公開フラグ"
-        created_at timestamp "作成日時"
-    }
-    project_members {
-        bigserial id PK
-        project_id bigint FK "プロジェクトID"
-        user_id bigint FK "ユーザーID"
-        role_id bigint FK "ロールID"
-    }
-    trackers {
-        bigserial id PK
-        name varchar UK "トラッカー名"
-        position int "表示順"
-    }
-    issue_statuses {
-        bigserial id PK
-        name varchar UK "ステータス名"
-        is_closed boolean "完了フラグ"
-        position int "表示順"
-    }
-    issues {
-        bigserial id PK
-        project_id bigint FK "プロジェクトID"
-        varchar username UK
-        varchar email UK
-        varchar password_hash
-        varchar full_name
-        boolean is_admin
-        timestamp created_at
-        timestamp updated_at
+        varchar username UK "ユーザー名"
+        varchar email UK "メールアドレス"
+        varchar password_hash "パスワードハッシュ"
+        varchar full_name "氏名"
+        boolean is_admin "管理者フラグ"
+        timestamp created_at "作成日時"
+        timestamp updated_at "更新日時"
     }
 
     roles {
         bigserial id PK
-        varchar name UK
-        text description
+        varchar name UK "ロール名"
+        text description "説明"
     }
 
     projects {
         bigserial id PK
-        varchar name
-        varchar identifier UK
-        text description
-        boolean is_public
-        timestamp created_at
+        varchar name "プロジェクト名"
+        varchar identifier UK "識別子"
+        text description "説明"
+        boolean is_public "公開フラグ"
+        timestamp created_at "作成日時"
+        timestamp updated_at "更新日時"
     }
 
     project_members {
         bigserial id PK
-        bigint project_id FK
-        bigint user_id FK
-        bigint role_id FK
-        UNIQUE(project_id, user_id, role_id)
+        bigint project_id FK "プロジェクトID"
+        bigint user_id FK "ユーザーID"
+        bigint role_id FK "ロールID"
     }
 
     trackers {
         bigserial id PK
-        varchar name UK
-        int position
+        varchar name UK "トラッカー名"
+        int position "表示順"
     }
 
     issue_statuses {
         bigserial id PK
-        varchar name UK
-        boolean is_closed
-        int position
+        varchar name UK "ステータス名"
+        boolean is_closed "完了フラグ"
+        int position "表示順"
     }
 
     issues {
         bigserial id PK
-        bigint project_id FK
-        bigint tracker_id FK
-        bigint status_id FK
-        bigint author_id FK
-        bigint assignee_id FK
-        varchar subject
-        text description
-        varchar priority
-        date start_date
-        date due_date
-        numeric estimated_hours
-        timestamp created_at
-        timestamp updated_at
+        bigint project_id FK "プロジェクトID"
+        bigint tracker_id FK "トラッカーID"
+        bigint status_id FK "ステータスID"
+        bigint author_id FK "作成者ID"
+        bigint assignee_id FK "担当者ID"
+        varchar subject "題名"
+        text description "説明"
+        varchar priority "優先度"
+        date start_date "開始日"
+        date due_date "期日"
+        numeric estimated_hours "予定工数"
+        timestamp created_at "作成日時"
+        timestamp updated_at "更新日時"
     }
 
     journals {
         bigserial id PK
-        bigint issue_id FK
-        bigint user_id FK
-        text notes
-        timestamp created_at
+        bigint issue_id FK "チケットID"
+        bigint user_id FK "更新者ID"
+        text notes "コメント"
+        timestamp created_at "作成日時"
     }
 
     journal_details {
         bigserial id PK
-        bigint journal_id FK
-        varchar property
-        text old_value
-        text new_value
+        bigint journal_id FK "履歴ID"
+        varchar property "変更属性"
+        text old_value "変更前データ"
+        text new_value "変更後データ"
     }
 
     workflows {
         bigserial id PK
-        bigint role_id FK
-        bigint tracker_id FK
-        bigint old_status_id FK
-        bigint new_status_id FK
-        UNIQUE(role_id, tracker_id, old_status_id, new_status_id)
+        bigint role_id FK "ロールID"
+        bigint tracker_id FK "トラッカーID"
+        bigint old_status_id FK "変更前ステータスID"
+        bigint new_status_id FK "変更後ステータスID"
     }
 
-    % Relationships
-    users ||--o{ project_members : has
-    roles ||--o{ project_members : assigns
-    projects ||--o{ project_members : contains
-    
-    projects ||--o{ issues : contains
-    trackers ||--o{ issues : has_type
-    issue_statuses ||--o{ issues : has_status
-    
-    users ||--o{ issues : creates
-    users ||--o{ journals : updates
-    
-    issues ||--o{ journals : has_history
-    issues ||--o{ journal_details : is_detailed_by
-    
-    roles ||--o{ workflows : defines_for
-    trackers ||--o{ workflows : defines_for
-    issue_statuses ||--o{ workflows : transitions_between
-  ```
+    %% リレーション定義
+    users ||--o{ project_members : "belongs_to"
+    roles ||--o{ project_members : "assigned_to"
+    projects ||--o{ project_members : "contains"
+
+    projects ||--o{ issues : "contains"
+    trackers ||--o{ issues : "has_type"
+    issue_statuses ||--o{ issues : "has_status"
+    users ||--o{ issues : "authors"
+    users ||--o{ issues : "assigned_to"
+
+    issues ||--o{ journals : "has_history"
+    users ||--o{ journals : "creates"
+    journals ||--o{ journal_details : "has_details"
+
+    roles ||--o{ workflows : "defines_for"
+    trackers ||--o{ workflows : "defines_for"
+    issue_statuses ||--o{ workflows : "from_status"
+    issue_statuses ||--o{ workflows : "to_status"
+```
