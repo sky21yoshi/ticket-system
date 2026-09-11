@@ -1,4 +1,5 @@
 ## 1. 概要
+
 本ドキュメントは、Redmine風チケット管理システムを構築するためのデータベース（PostgreSQL）のテーブル一覧および各テーブルの詳細設計情報です。
 
 ---
@@ -6,7 +7,7 @@
 ## 2. テーブル一覧 (Table Overview)
 
 | No. | テーブル名（物理名） | テーブル名（論理名） | 概要・説明 | 主キー (PK) |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | 1 | `users` | ユーザー | システムを利用するユーザー情報 | `id` |
 | 2 | `roles` | ロール（権限） | プロジェクト内における権限グループ情報 | `id` |
 | 3 | `projects` | プロジェクト | チケットやメンバを管理する最上位単位 | `id` |
@@ -23,8 +24,9 @@
 ## 3. 各テーブル詳細設計 (Table Definitions)
 
 ### 3.1. `users`（ユーザー）
+
 | カラム名（物理名） | 論理名 | データ型 | 制約 | 説明 |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | `id` | ユーザーID | `BIGSERIAL` | PRIMARY KEY | 自動採番キー |
 | `username` | ユーザー名 | `VARCHAR(50)` | NOT NULL, UNIQUE | ログイン用ユーザー名 |
 | `email` | メールアドレス | `VARCHAR(255)` | NOT NULL, UNIQUE | 通知・ログイン用メールアドレス |
@@ -37,8 +39,9 @@
 ---
 
 ### 3.2. `roles`（ロール）
+
 | カラム名（物理名） | 論理名 | データ型 | 制約 | 説明 |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | `id` | ロールID | `BIGSERIAL` | PRIMARY KEY | 自動採番キー |
 | `name` | ロール名 | `VARCHAR(50)` | NOT NULL, UNIQUE | 管理者, 開発者, 報告者, 閲覧者 など |
 | `description` | 説明 | `TEXT` | - | ロールの役割・定義に関する説明 |
@@ -46,8 +49,9 @@
 ---
 
 ### 3.3. `projects`（プロジェクト）
+
 | カラム名（物理名） | 論理名 | データ型 | 制約 | 説明 |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | `id` | プロジェクトID | `BIGSERIAL` | PRIMARY KEY | 自動採番キー |
 | `name` | プロジェクト名 | `VARCHAR(100)` | NOT NULL | プロジェクトの名称 |
 | `identifier` | プロジェクト識別子 | `VARCHAR(50)` | NOT NULL, UNIQUE | URLやキー指定に用いる一意な文字列 |
@@ -58,8 +62,9 @@
 ---
 
 ### 3.4. `project_members`（プロジェクトメンバー）
+
 | カラム名（物理名） | 論理名 | データ型 | 制約 | 説明 |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | `id` | メンバーID | `BIGSERIAL` | PRIMARY KEY | 自動採番キー |
 | `project_id` | プロジェクトID | `BIGINT` | NOT NULL, FK(`projects.id`) | 参照するプロジェクト |
 | `user_id` | ユーザーID | `BIGINT` | NOT NULL, FK(`users.id`) | 参照するユーザー |
@@ -69,8 +74,9 @@
 ---
 
 ### 3.5. `trackers`（トラッカー）
+
 | カラム名（物理名） | 論理名 | データ型 | 制約 | 説明 |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | `id` | トラッカーID | `BIGSERIAL` | PRIMARY KEY | 自動採番キー |
 | `name` | トラッカー名 | `VARCHAR(50)` | NOT NULL, UNIQUE | バグ, 機能追加, タスク, サポート など |
 | `position` | 表示順 | `INT` | DEFAULT 0 | 画面上の表示順序 |
@@ -78,8 +84,9 @@
 ---
 
 ### 3.6. `issue_statuses`（ステータス）
+
 | カラム名（物理名） | 論理名 | データ型 | 制約 | 説明 |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | `id` | ステータスID | `BIGSERIAL` | PRIMARY KEY | 自動採番キー |
 | `name` | ステータス名 | `VARCHAR(50)` | NOT NULL, UNIQUE | 新規, 進行中, 解決, 完了, 却下 など |
 | `is_closed` | 完了フラグ | `BOOLEAN` | DEFAULT false | 該当ステータスが「終了状態」か否か |
@@ -88,8 +95,9 @@
 ---
 
 ### 3.7. `issues`（チケット）
+
 | カラム名（物理名） | 論理名 | データ型 | 制約 | 説明 |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | `id` | チケットID | `BIGSERIAL` | PRIMARY KEY | 自動採番キー |
 | `project_id` | プロジェクトID | `BIGINT` | NOT NULL, FK(`projects.id`) | 所属プロジェクト |
 | `tracker_id` | トラッカーID | `BIGINT` | NOT NULL, FK(`trackers.id`) | チケット種別 |
@@ -108,8 +116,9 @@
 ---
 
 ### 3.8. `journals`（変更履歴ヘッダー）
+
 | カラム名（物理名） | 論理名 | データ型 | 制約 | 説明 |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | `id` | 履歴ID | `BIGSERIAL` | PRIMARY KEY | 自動採番キー |
 | `issue_id` | チケットID | `BIGINT` | NOT NULL, FK(`issues.id`) | 対象のチケット |
 | `user_id` | 更新者ID | `BIGINT` | NOT NULL, FK(`users.id`) | 変更を行ったユーザー |
@@ -119,8 +128,9 @@
 ---
 
 ### 3.9. `journal_details`（変更履歴明細）
+
 | カラム名（物理名） | 論理名 | データ型 | 制約 | 説明 |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | `id` | 明細ID | `BIGSERIAL` | PRIMARY KEY | 自動採番キー |
 | `journal_id` | 履歴ID | `BIGINT` | NOT NULL, FK(`journals.id`) | 親となる履歴ヘッダー |
 | `property` | 変更属性 | `VARCHAR(50)` | NOT NULL | 変更対象項目（例: `status_id`, `assignee_id`） |
@@ -130,8 +140,9 @@
 ---
 
 ### 3.10. `workflows`（ワークフロー制御）
+
 | カラム名（物理名） | 論理名 | データ型 | 制約 | 説明 |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | `id` | ワークフローID | `BIGSERIAL` | PRIMARY KEY | 自動採番キー |
 | `role_id` | ロールID | `BIGINT` | NOT NULL, FK(`roles.id`) | 対象ロール |
 | `tracker_id` | トラッカーID | `BIGINT` | NOT NULL, FK(`trackers.id`) | 対象トラッカー |
@@ -140,3 +151,116 @@
 | *ユニーク制約* | - | - | UNIQUE(`role_id`, `tracker_id`, `old_status_id`, `new_status_id`) | 重複定義の防止 |
 
 ---
+
+## 4. ER図 (Entity Relationship Diagram)
+
+```mermaid
+erDiagram
+    users {
+        bigserial id PK
+        varchar username UK
+        varchar email UK
+        varchar password_hash
+        varchar full_name
+        boolean is_admin
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    roles {
+        bigserial id PK
+        varchar name UK
+        text description
+    }
+
+    projects {
+        bigserial id PK
+        varchar name
+        varchar identifier UK
+        text description
+        boolean is_public
+        timestamp created_at
+    }
+
+    project_members {
+        bigserial id PK
+        bigint project_id FK
+        bigint user_id FK
+        bigint role_id FK
+        UNIQUE(project_id, user_id, role_id)
+    }
+
+    trackers {
+        bigserial id PK
+        varchar name UK
+        int position
+    }
+
+    issue_statuses {
+        bigserial id PK
+        varchar name UK
+        boolean is_closed
+        int position
+    }
+
+    issues {
+        bigserial id PK
+        bigint project_id FK
+        bigint tracker_id FK
+        bigint status_id FK
+        bigint author_id FK
+        bigint assignee_id FK
+        varchar subject
+        text description
+        varchar priority
+        date start_date
+        date due_date
+        numeric estimated_hours
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    journals {
+        bigserial id PK
+        bigint issue_id FK
+        bigint user_id FK
+        text notes
+        timestamp created_at
+    }
+
+    journal_details {
+        bigserial id PK
+        bigint journal_id FK
+        varchar property
+        text old_value
+        text new_value
+    }
+
+    workflows {
+        bigserial id PK
+        bigint role_id FK
+        bigint tracker_id FK
+        bigint old_status_id FK
+        bigint new_status_id FK
+        UNIQUE(role_id, tracker_id, old_status_id, new_status_id)
+    }
+
+    % Relationships
+    users ||--o{ project_members : has
+    roles ||--o{ project_members : assigns
+    projects ||--o{ project_members : contains
+    
+    projects ||--o{ issues : contains
+    trackers ||--o{ issues : has_type
+    issue_statuses ||--o{ issues : has_status
+    
+    users ||--o{ issues : creates
+    users ||--o{ journals : updates
+    
+    issues ||--o{ journals : has_history
+    issues ||--o{ journal_details : is_detailed_by
+    
+    roles ||--o{ workflows : defines_for
+    trackers ||--o{ workflows : defines_for
+    issue_statuses ||--o{ workflows : transitions_between
+  ```
