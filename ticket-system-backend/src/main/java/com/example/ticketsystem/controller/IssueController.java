@@ -28,7 +28,7 @@ import jakarta.validation.Valid;
  * Base URL: /api/issues
  */
 @RestController
-@RequestMapping("/api/issues")
+@RequestMapping({"/api/issues", "/api/tickets"})
 public class IssueController {
 
     private final IssueService issueService;

@@ -90,4 +90,11 @@ public class IssueResponse {
 
     /** 変更履歴リスト */
     private List<JournalResponse> journals;
+
+    /**
+     * フロントエンド互換用ゲッター（題名）
+     */
+    public String getTitle() {
+        return this.subject;
+    }
 }
