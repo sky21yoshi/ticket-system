@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>チケット一覧</title>
+</head>
+<body>
+  <h1>チケット管理システム</h1>
+
+  <% if (error) { %>
+    <p style="color: red;"><%= error %></p>
+  <% } %>
+
+  <ul>
+    <% if (tickets && tickets.length > 0) { %>
+      <% tickets.forEach(ticket => { %>
+        <li><strong>[<%= ticket.id %>]</strong> <%= ticket.title %></li>
+      <% }); %>
+    <% } else { %>
+      <li>チケットはありません。</li>
+    <% } %>
+  </ul>
+</body>
+</html>

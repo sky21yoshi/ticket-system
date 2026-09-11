@@ -1,3 +1,5 @@
+# チケット管理システム
+
 ## 1. 概要
 
 本ドキュメントは、Redmine風チケット管理システムを構築するためのデータベース（PostgreSQL）のテーブル一覧および各テーブルの詳細設計情報です。
@@ -158,6 +160,46 @@
 erDiagram
     users {
         bigserial id PK
+    email varchar UK "メールアドレス"
+    password_hash varchar "パスワードハッシュ"
+    full_name varchar "氏名"
+    is_admin boolean "管理者フラグ"
+    created_at timestamp "作成日時"
+    updated_at timestamp "更新日時"
+    }
+    roles {
+        bigserial id PK
+        name varchar UK "ロール名"
+        description text "説明"
+    }
+    projects {
+        bigserial id PK
+        name varchar "プロジェクト名"
+        identifier varchar UK "識別子"
+        description text "説明"
+        is_public boolean "公開フラグ"
+        created_at timestamp "作成日時"
+    }
+    project_members {
+        bigserial id PK
+        project_id bigint FK "プロジェクトID"
+        user_id bigint FK "ユーザーID"
+        role_id bigint FK "ロールID"
+    }
+    trackers {
+        bigserial id PK
+        name varchar UK "トラッカー名"
+        position int "表示順"
+    }
+    issue_statuses {
+        bigserial id PK
+        name varchar UK "ステータス名"
+        is_closed boolean "完了フラグ"
+        position int "表示順"
+    }
+    issues {
+        bigserial id PK
+        project_id bigint FK "プロジェクトID"
         varchar username UK
         varchar email UK
         varchar password_hash
