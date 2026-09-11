@@ -1,6 +1,9 @@
 version: '3.8'
 
 services:
+  # ==========================================
+  # 1. データベースサービス (PostgreSQL 16)
+  # ==========================================
   db:
     image: postgres:16-alpine
     container_name: ticket-db
@@ -12,12 +15,22 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      # 初回起動時にDDLと初期データを自動実行
+      - ./initdb.sql:/docker-entrypoint-initdb.d/initdb.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ticket_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     networks:
       - app-network
 
+  # ==========================================
+  # 2. バックエンド API (Spring Boot 3 / Java 21)
+  # ==========================================
   backend:
     build:
-      context: ./backend
+      context: .
       dockerfile: Dockerfile
     container_name: ticket-backend
     environment:
@@ -28,10 +41,14 @@ services:
     ports:
       - "8081:8081"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     networks:
       - app-network
 
+  # ==========================================
+  # 3. フロントエンド (Node.js / Express)
+  # ==========================================
   frontend:
     build:
       context: ./frontend
@@ -40,8 +57,6 @@ services:
     ports:
       - "3000:3000"
     environment:
-      # Node.jsサーバー（Dockerコンテナ内部）からバックエンドへ通信するため
-      # ホスト名にはサービス名「backend」とポート「8081」を指定します
       - BACKEND_URL=http://backend:8081
     depends_on:
       - backend
