@@ -71,6 +71,7 @@ public interface IssueService {
     /**
      * プロジェクトに所属する全チケット一覧を取得します。
      * 
+     * @param projectId プロジェクトID
      * @return チケットレスポンスリスト
      */
     List<IssueResponse> findByProjectId(Long projectId);

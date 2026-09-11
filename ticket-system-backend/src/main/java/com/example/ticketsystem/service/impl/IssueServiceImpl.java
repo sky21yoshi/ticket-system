@@ -87,6 +87,9 @@ public class IssueServiceImpl implements IssueService {
                 .toList();
     }
 
+    /**
+     * プロジェクトは以下の全チケットを取得
+     */
     @Override
     @Transactional(readOnly = true)
     public List<IssueResponse> findByProjectId(Long projectId) {
