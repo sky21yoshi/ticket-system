@@ -66,4 +66,12 @@ public interface IssueService {
      * @return 削除が実行された場合は true、存在しない場合は false
      */
     boolean deleteById(Long id);
+
+
+    /**
+     * プロジェクトに所属する全チケット一覧を取得します。
+     * 
+     * @return チケットレスポンスリスト
+     */
+    List<IssueResponse> findByProjectId(Long projectId);
 }

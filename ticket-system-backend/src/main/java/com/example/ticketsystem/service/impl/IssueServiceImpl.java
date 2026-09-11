@@ -87,6 +87,14 @@ public class IssueServiceImpl implements IssueService {
                 .toList();
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<IssueResponse> findByProjectId(Long projectId) {
+        return issueRepository.findByProjectId(projectId).stream()
+                .map(this::convertToResponse)
+                .toList();
+    }
+
     /**
      * チケット一覧・絞り込み検索 (F-303)
      */

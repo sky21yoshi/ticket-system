@@ -77,6 +77,20 @@ public class IssueController {
     }
 
     /**
+     * プロジェクトに属する全チケット一覧取得 API (新規追加)
+     * GET /api/issues/project/{projectId}
+     * 
+     * @param projectId プロジェクトID
+     * @return チケットレスポンスリスト
+     */
+    @GetMapping("/project/{projectId}")
+    public ResponseEntity<List<IssueResponse>> getIssuesByProject(@PathVariable Long projectId) {
+        List<IssueResponse> issues = issueService.findByProjectId(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException("プロジェクトが見つかりません: ID=" + projectId));
+        return ResponseEntity.ok(issues);
+    }
+
+    /**
      * チケット詳細取得 API（変更履歴含む）
      * GET /api/issues/{id}
      * 
